@@ -1,11 +1,14 @@
 #CartManager  
-*API de gestion de panier pour applications e-commerce*  
-**!!! En cours de développement !!!**  
+*API de gestion de panier pour applications e-commerce (**v.1.0**)*
+
 ####Installation
+**PHP5 requis**
 ```php
 require path/to/CartManager.php; 
 ```
 ####API
+
+*En cours de rédaction*
 ```php
 function __construct( string $curr ) {...}
 ```
@@ -13,7 +16,7 @@ function __construct( string $curr ) {...}
 function addToCart( array $prod ) {...}
 ```
 ```php
-function updateQuantity( int $id, [int $quantity] ) {...}
+function updateQuantity( int $id, [bool $add, int $quantity] ) {...}
 ```
 ```php
 function deleteItem( int $id ) {...}
