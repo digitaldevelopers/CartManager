@@ -7,7 +7,7 @@ require path/to/CartManager.php;
 ```
 ####API
 ```php
-function create() {...}
+function __construct( string $curr) {...}
 ```
 ```php
 function addToCart( array $prod ) {...}
@@ -23,6 +23,18 @@ function resetCart() {...}
 ```
 ```php
 function nbProduct() {...}
+```
+```php
+function getPrice() {...}
+```
+```php
+function getSymbol() {...}
+```
+```php
+function getStringCurrency() {...}
+```
+```php
+function readMeta( string $key ) {...}
 ```
 
 ####License 
