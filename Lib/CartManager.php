@@ -8,7 +8,9 @@
  *
  * @version 1.0
  * @author  Gaudé Benjamin <support@gaudebenjamin.com>
- * @license MIT 
+ * @license Licence Creative Commons Attribution
+ *          Partage dans les Mêmes Conditions 4.0 International 
+ *          http://creativecommons.org/licenses/by-sa/4.0/
  */
 class CartManager {
 
