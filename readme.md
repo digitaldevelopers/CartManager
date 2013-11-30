@@ -1,5 +1,5 @@
 #CartManager  
-*API de gestion de panier pour applications e-commerce (**v.1.0**)*
+*API de gestion de panier pour applications e-commerce*
 
 ####Installation
 **PHP5 requis**
