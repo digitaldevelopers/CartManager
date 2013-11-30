@@ -21,6 +21,9 @@ function deleteItem( int $id ) {...}
 ```php
 function resetCart() {...}
 ```
+```php
+function nbProduct() {...}
+```
 
 ####License 
 [MIT](http://opensource.org/licenses/MIT)

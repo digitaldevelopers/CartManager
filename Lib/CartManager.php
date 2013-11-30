@@ -11,28 +11,49 @@
  * @license MIT 
  */
 class CartManager {
-	
+
 	/**
-	 * Meta-data for verbose creation
+	 * Currency supported
 	 * @var array
 	 * @since  1.0
 	 */
-	private $meta = array(
-		'created' => date(),
-		'modified' => date()
-	);
+	public $currency_allowed = array(
+		'euro' => array(
+			'symbol' 	=> '€',
+			'singular' 	=> 'euro',
+			'plural' 	=> 'euros'
+			),
+		'dollar' => array(
+			'symbol' => '$',
+			'singular' => 'dollar',
+			'plural' => 'dollars'
+			)
+		);
 
 	/**
-	 * Create Cart
-	 * @param  boolean $verbose Add meta-data into cart
-	 * @return void           
+	 * Current currency
+	 * @var string
 	 * @since  1.0
 	 */
-	public function createCart() {
+	public $currency = "";
+
+	/**
+	 * Constructor
+	 * @param string $curr Currency to use
+	 * @since  1.0
+	 */
+	public function __construct($curr = 'euro') {
 		if( !isset($_SESSION['cart']) ) {
 			$_SESSION['cart'] = array();
+			$_SESSION['cart']['meta']['created'] = date('Y-m-d H:i:s');
+			$_SESSION['cart']['meta']['modified'] = date('Y-m-d H:i:s');
 		}
-		array_push($_SESSION['cart'], $this->meta);
+
+		if( array_key_exists($curr, $this->currency_allowed) ) {
+			$this->currency = $curr;
+		} else {
+			die('This currency (<strong>'.$curr.'</strong>) is not allowed / supported');
+		}
 	}
 
 	/**
@@ -48,8 +69,8 @@ class CartManager {
 			return false;
 		}
 		if( isset($prod['id']) ) {
-			if( !isset($_SESSION['cart'][$prod['id']]) ) {
-				$_SESSION['cart'][$prod['id']] = array(
+			if( !isset($_SESSION['cart']['content'][$prod['id']]) ) {
+				$_SESSION['cart']['content'][$prod['id']] = array(
 					'added' => date('Y-m-d H:i:s'),
 					'modified' => date('Y-m-d H:i:s'),
 					'quantity' => 1,
@@ -60,7 +81,7 @@ class CartManager {
 				);
 				return true;
 			} else {
-				if( !$this->updateQuantity($prod['id']) )
+				if( !$this->updateQuantity($prod['id'], true) )
 					return false;
 			} 	
 		} else {
@@ -74,13 +95,16 @@ class CartManager {
 	 * @return void  FALSE if an error occured
 	 * @since  1.0
 	 */
-	public function updateQuantity( $id, $quantity = 1) {
+	public function updateQuantity( $id, $add = false, $quantity = 1) {
 		if( $this->isInCart($id) ) {
 			if( is_integer($quantity) ){
 				if( !$quantity ) {
 					$this->deleteItem( $id );
 				} else {
-					$_SESSION['cart'][$id]['quantity'] += $quantity;
+					if( $add )
+						$_SESSION['cart']['content'][$id]['quantity'] += $quantity;
+					else
+						$_SESSION['cart']['content'][$id]['quantity'] = $quantity;
 				}
 				$this->lastModified( $id );
 			}
@@ -96,7 +120,7 @@ class CartManager {
 	 * @since  1.0
 	 */
 	private function isInCart( $id ) {
-		return isset($_SESSION['cart'][$id]);
+		return isset($_SESSION['cart']['content'][$id]);
 	}
 
 	/**
@@ -106,12 +130,12 @@ class CartManager {
 	 */
 	private function lastModified( $id = null ) {
 		if( isset($_SESSION['cart']) ) {
-			$_SESSION['cart']['meta']['modified'] = date();
+			$_SESSION['cart']['meta']['modified'] = date('Y-m-d H:i:s');
 		}
 
 		if( !is_null($id) ) {
 			if( $this->isInCart($id) ) {
-				$_SESSION['cart'][$id]['modified'] = date();
+				$_SESSION['cart']['content'][$id]['modified'] = date('Y-m-d H:i:s');
 			}
 		}
 	}
@@ -123,8 +147,8 @@ class CartManager {
 	 * @since  1.0
 	 */
 	public function deleteItem( $id ) {
-		if( isset($_SESSION['cart'][$id]) ) {
-			unset($_SESSION['cart'][$id])
+		if( isset($_SESSION['cart']['content'][$id]) ) {
+			unset($_SESSION['cart']['content'][$id]);
 		} else {
 			return false;
 		}
@@ -137,10 +161,89 @@ class CartManager {
 	 */
 	public function resetCart() {
 		if( isset($_SESSION['cart']) ) {
-			$_SESSION['cart'] = array();
+			$_SESSION['cart']['content'] = array();
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * Calculating the number of products in the shopping cart
+	 * @return int 	$nb Product number - FALSE if an error occured
+	 * @since  1.0
+	 */
+	public function nbProduct() {
+		if( isset($_SESSION['cart']) ) {
+			$nb = 0;
+			if( empty($_SESSION['cart']['content']) ) {
+				return $nb;
+			}
+			foreach($_SESSION['cart']['content'] as $product) {
+				$nb += $product['quantity'];
+			}
+			return $nb;
+		}
+		return false;
+	}
+
+	public function getPrice() {
+		if( isset($_SESSION['cart']) ) {
+			$price = 0.00;
+			if( empty($_SESSION['cart']['content']) ) {
+				return number_format($price, 2);
+			}
+			foreach($_SESSION['cart']['content'] as $product) {
+				$price += $product['quantity']*$product['unitPrice'];
+			}
+			return number_format($price, 2);
+		}
+		return false;
+	}
+
+	/**
+	 * Erase all cart session content
+	 * @return void 
+	 * @since  1.0
+	 */
+	public function eraseCart() {
+		if( isset($_SESSION['cart']) ) {
+			unset( $_SESSION['cart'] );
+		}
+	}
+
+	/**
+	 * Return currencu symbol
+	 * @return string Symbol
+	 * @since  1.0
+	 */
+	public function getSymbol() {
+		return $this->currency_allowed[$this->currency]['symbol'];
+	}
+
+	/**
+	 * Return string currency
+	 * @return strong String currency
+	 * @since  1.0
+	 */
+	public function getStringCurrency() {
+		if( $this->getPrice() > 1 ) {
+			return $this->currency_allowed[$this->currency]['plural'];
+		} else {
+			return $this->currency_allowed[$this->currency]['singular'];
+		}
+	}
+
+	/**
+	 * Read meta-data
+	 * @param  strong $key Meta-data name
+	 * @return string      Meta-data content
+	 * @since  1.0
+	 */
+	public function readMeta($key) {
+		if( isset($_SESSION['cart']['meta'][$key]) )
+			return $_SESSION['cart']['meta'][$key];
+
+		return false;
 	}
 }
 ?>
