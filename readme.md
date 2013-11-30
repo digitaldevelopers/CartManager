@@ -7,7 +7,7 @@ require path/to/CartManager.php;
 ```
 ####API
 ```php
-function __construct( string $curr) {...}
+function __construct( string $curr ) {...}
 ```
 ```php
 function addToCart( array $prod ) {...}
